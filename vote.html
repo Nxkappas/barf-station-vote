@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Voting Page</title>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.0.0/firebase-database.js"></script>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-image: url('background.jpg'); /* Replace with your image */
+            background-size: cover;
+            background-position: center;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .picture {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        img {
+            max-width: 100%;
+            border-radius: 8px;
+        }
+
+        button {
+            margin-top: 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+            border: none;
+            background-color: #007BFF;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #adminArea {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Vote for Your Favorite Picture</h1>
+
+    <div>
+        <button onclick="vote('picture_1')">Vote for Picture 1</button>
+        <button onclick="vote('picture_2')">Vote for Picture 2</button>
+        <button onclick="vote('picture_3')">Vote for Picture 3</button>
+    </div>
+
+    <h2>Current Votes:</h2>
+    <div id="vote-display"></div>
+
+    <script>
+        // Firebase configuration and initialization
+        const firebaseConfig = {
+            apiKey: "AIzaSyCMHgZQlN5Zj5HkzUanPHQYtDhIVKEPrSc",
+            authDomain: "barf-vote.firebaseapp.com",
+            projectId: "barf-vote",
+            storageBucket: "barf-vote.firebasestorage.app",
+            messagingSenderId: "1018591072089",
+            appId: "1:1018591072089:web:0e12a3d0475d2d3560c648",
+            measurementId: "G-CVN9X968G1"
+        };
+
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const database = firebase.database(app);
+
+        // Voting function
+        function vote(picture) {
+            const pictureRef = database.ref('votes/' + picture);
+
+            pictureRef.get().then((snapshot) => {
+                if (snapshot.exists()) {
+                    const currentVotes = snapshot.val();
+                    pictureRef.set(currentVotes + 1);  // Increment vote count by 1
+                    alert("Vote successfully cast for " + picture);
+                } else {
+                    console.log("No data available");
+                }
+            }).catch((error) => {
+                console.error(error);
+            });
+        }
+
+        // Function to display votes
+        function displayVotes() {
+            const votesRef = database.ref('votes');
+
+            votesRef.on('value', (snapshot) => {
+                const votes = snapshot.val();
+                const voteDisplay = document.getElementById('vote-display');
+
+                let voteHTML = '';
+                for (const picture in votes) {
+                    voteHTML += `<div>${picture}: ${votes[picture]} votes</div>`;
+                }
+
+                voteDisplay.innerHTML = voteHTML;
+            });
+        }
+
+        // Call displayVotes on page load
+        window.onload = function() {
+            displayVotes();
+        };
+    </script>
+</body>
+</html>
